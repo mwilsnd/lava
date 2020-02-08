@@ -37,7 +37,7 @@ Subsequent calls to `:New()` will return the same instance.
 
 #### interface
 `interface` objects are nothing more than a collection of methods and, optionally, member variables.
-Methods from interfaces are not inherited by classes that implement them per-say, rather a class that implements an interface is required to at least define the same set of methods as they appear in the interface.
+Methods from interfaces are not inherited by classes that implement them per-se, rather a class that implements an interface is required to at least define the same set of methods as they appear in the interface.
 Failing to define a method in a class that is mentioned in an `implemented` interface will result in an error.
 Parent/base classes can implement interfaces, be aware however that implementing the same interface in a parent and child class will result in an error.
 
