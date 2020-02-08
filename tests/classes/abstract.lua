@@ -1,0 +1,3 @@
+do abstract "EmptyAbstract"
+	{}
+end
