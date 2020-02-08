@@ -416,8 +416,14 @@ a:SetOurMessage( "Hey There!" )
 print( b:GetOurMessage() ) -- prints nothing, as ChildA and ChildB have different shared blocks
 
 a:SetParentMessage( "Hey There!" )
-print( b:GetOurMessage() ) -- prints "Hey There!", as ChildA and ChildB extend from the same parent with a shared block
+print( b:GetParentMessage() ) -- prints "Hey There!", as ChildA and ChildB extend from the same parent with a shared block
 ```
 
 **NOTE:** Shared blocks are an advanced feature. Be aware that calling a parent method which reads or writes from `shared` will try to read from the child's shared block and not the parent's!
 You can only read from a parent's shared block via `super_shared`.
+
+## Common issues
+
+### Class instances inside a definition member block
+When defining a class, you may be tempted to place an instance of another class in the members block. Doing this is undefined behavior and should be avoided - Copied instances are not correctly registered with the lava library and strange issues can result.
+Instead, just instantiate your member classes inside the constructor or another method.
