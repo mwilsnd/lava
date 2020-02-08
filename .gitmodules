@@ -1,0 +1,3 @@
+[submodule "deps/luaunit"]
+	path = deps/luaunit
+	url = https://github.com/bluebird75/luaunit.git
