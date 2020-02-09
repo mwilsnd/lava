@@ -67,6 +67,7 @@ Additionally, the following methods become available:
 * getter
 * setter
 * shared_block
+* finally
 
 Let's run through each of these and describe what they do.
 
@@ -103,6 +104,22 @@ setter "MethodName->memberVariable"
 
 #### accessor
 `accessor` is a combination of `getter` and `setter`, creating both a Get() and Set() method.
+
+#### finally
+`finally` can be used to invoke a method when a class definition is finalized - allowing you to then register your class with other systems or instantiate it right away.
+An example:
+```lua
+do singleton "Example"
+	{}
+
+	function Initialize( self )
+	end
+
+	finally( function()
+		_G.mySingleton = this:New()
+	end )
+end
+```
 
 ## Working with class instances
 Let's define and create an instance of a simple class.

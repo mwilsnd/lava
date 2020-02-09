@@ -74,3 +74,13 @@ function TestMisc:testVarnameConflict()
 	lu.assertEquals( b, false )
 	lu.assertStrContains( err, "Class name conflict! Found another variable at" )
 end
+
+function TestMisc:testUserDefinedFinalizer()
+	if not UserFinalizer then
+		local b, err = pcall( function()
+			lava.loadClass "tests/classes/user_defined_finalizer.lua"
+		end )
+		lu.assertEquals( b, true )
+	end
+	lu.assertEquals( _G.userFinalizerSingleton, UserFinalizer:New() )
+end
