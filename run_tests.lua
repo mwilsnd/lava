@@ -4,7 +4,7 @@ abstract = lava.abstract
 interface = lava.interface
 singleton = lava.singleton
 mixin = lava.mixin
-
+isA = lava.is_a
 
 lava.loadClass "tests/classes/basic_class_a.lua"
 lava.loadClass "tests/classes/basic_class_b.lua"
@@ -41,6 +41,12 @@ lava.loadClass "tests/classes/malformed_missing_constructor.lua"
 lava.loadClass "tests/classes/fifo.lua"
 lava.loadClass "tests/classes/counter.lua"
 
+if _VERSION == "Lua 5.3" or _VERSION == "Lua 5.4" then
+	lava.loadClass "tests/classes/metamethods53.lua"
+else
+	lava.loadClass "tests/classes/metamethods52.lua"
+end
+
 lu = require "deps/luaunit/luaunit"
 
 dofile "tests/inherit.lua"
@@ -49,6 +55,17 @@ dofile "tests/singleton.lua"
 dofile "tests/interface.lua"
 dofile "tests/mixin.lua"
 dofile "tests/shared_blocks.lua"
+dofile "tests/meta52.lua"
+
+if _VERSION == "Lua 5.3" then
+	dofile "tests/meta53.lua"
+end
+
+if _VERSION == "Lua 5.4" then
+	dofile "tests/meta53.lua"
+	dofile "tests/meta54.lua"
+end
+
 dofile "tests/misc.lua"
 dofile "tests/usage.lua"
 

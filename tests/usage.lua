@@ -2,7 +2,7 @@ TestUsage = {}
 
 function TestUsage:testCounter()
 	local a, b = false, false
-	local counter = test.Counter:New()
+	local counter = testCounter.Counter:New()
 	counter:SetFIFOGC( function()
 		a = true
 	end )
@@ -17,7 +17,7 @@ function TestUsage:testCounter()
 	lu.assertEquals( b, true )
 
 	local c = false
-	for k, v in pairs( test.Counter:GetInstances() ) do
+	for k, v in pairs( testCounter.Counter:GetInstances() ) do
 		c = true
 		break
 	end

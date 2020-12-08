@@ -152,38 +152,6 @@ utils = {
 	end,
 }
 
-if not is51 then
-	function utils.setfenv( fn, env )
-		local i = 1
-		while true do
-			local name = debug.getupvalue( fn, i )
-			if name == "_ENV" then
-				debug.upvaluejoin( fn, i, function()
-					return env
-				end, 1 )
-				break
-			elseif not name then
-				break
-			end
-			i = i +1
-		end
-		return fn
-	end
-
-	function utils.getfenv( fn )
-		local i = 1
-		while true do
-			local name, val = debug.getupvalue( fn, i )
-			if name == "_ENV" then
-				return val
-			elseif not name then
-				break
-			end
-			i = i +1
-		end
-	end
-end
-
 function m:GetOrCreateNamespace( strNamespace )
 	local t = m.g
 	for _, v in ipairs( utils.splitString(strNamespace, ".") ) do
@@ -272,14 +240,6 @@ do
 			return classDecMTDef.__call( rawget(t, "dec"), ... )
 		end,
 	}
-
-	-- For mixins, more of the same
-	--[[local mixinMT = {
-		from = function( self, strNamespace )
-			self.ns = strNamespace
-			return self
-		end,
-	}]]--
 
 	local mixinMTObj = {
 		__index = function( t, k )
@@ -480,19 +440,29 @@ do
 	}
 
 	local metaLookup = {
-		["__tostring"] 	= true,
-		["__call"]  	= true,
-		["__eq"] 		= true,
-		["__unm"]		= true,
-		["__add"]		= true,
-		["__sub"]		= true,
-		["__mul"]		= true,
-		["__div"]		= true,
-		["__pow"]		= true,
-		["__concat"]	= true,
-		["__lt"] 		= true,
-		["__le"] 		= true,
-		["__len"] 		= true,
+		["__close"] = true,
+		["__tostring"] = true,
+		["__name"] = true,
+		["__call"] = true,
+		["__add"] = true,
+		["__sub"] = true,
+		["__mul"] = true,
+		["__div"] = true,
+		["__mod"] = true,
+		["__pow"] = true,
+		["__unm"] = true,
+		["__idiv"] = true,
+		["__band"] = true,
+		["__bor"] = true,
+		["__bxor"] = true,
+		["__bnot"] = true,
+		["__shl"] = true,
+		["__shr"] = true,
+		["__concat"] = true,
+		["__len"] = true,
+		["__eq"] = true,
+		["__lt"] = true,
+		["__le"] = true,
 	}
 
 	local removedMT = {
@@ -607,20 +577,32 @@ do
 			meta.__index = removedMT.__index
 			meta.__newindex = removedMT.__newindex
 			meta.__removed = true
+			meta.__close = nil
 			meta.__gc = nil
+
 			meta.__tostring = nil
+			meta.__name = nil
 			meta.__call = nil
-			meta.__eq = nil
-			meta.__unm = nil
+
 			meta.__add = nil
 			meta.__sub = nil
 			meta.__mul = nil
 			meta.__div = nil
+			meta.__mod = nil
 			meta.__pow = nil
+			meta.__unm = nil
+			meta.__idiv = nil
+			meta.__band = nil
+			meta.__bor = nil
+			meta.__bxor = nil
+			meta.__bnot = nil
+			meta.__shl = nil
+			meta.__shr = nil
 			meta.__concat = nil
+			meta.__len = nil
+			meta.__eq = nil
 			meta.__lt = nil
 			meta.__le = nil
-			meta.__len = nil
 		end
 	end
 
@@ -654,21 +636,31 @@ do
 
 		-- Construct the instance
 		local meta = {
+			__classDef = self.meta.__classDef,
+			__close = self.meta.__close,
 			__gc = self.meta.__gc,
 			__tostring = self.meta.__tostring,
+			__name = self.meta.__name,
 			__call = self.meta.__call,
-			__eq = self.meta.__eq,
-			__unm = self.meta.__unm,
 			__add = self.meta.__add,
 			__sub = self.meta.__sub,
 			__mul = self.meta.__mul,
 			__div = self.meta.__div,
+			__mod = self.meta.__mod,
 			__pow = self.meta.__pow,
+			__unm = self.meta.__unm,
+			__idiv = self.meta.__idiv,
+			__band = self.meta.__band,
+			__bor = self.meta.__bor,
+			__bxor = self.meta.__bxor,
+			__bnot = self.meta.__bnot,
+			__shl = self.meta.__shl,
+			__shr = self.meta.__shr,
 			__concat = self.meta.__concat,
+			__len = self.meta.__len,
+			__eq = self.meta.__eq,
 			__lt = self.meta.__lt,
 			__le = self.meta.__le,
-			__len = self.meta.__len,
-			__classDef = self.meta.__classDef,
 		}
 		meta.__mt = meta
 
@@ -682,21 +674,31 @@ do
 			mt.__instance = realInstance -- Hard ref to keep the instance alive for the lifetime of the proxy
 			mt.__index = realInstance
 			mt.__newindex = realInstance
+			mt.__classDef = meta.__classDef
+			mt.__close = meta.__close
 			mt.__gc = meta.__gc
 			mt.__tostring = meta.__tostring
+			mt.__name = meta.__name
 			mt.__call = meta.__call
-			mt.__eq = meta.__eq
-			mt.__unm = meta.__unm
 			mt.__add = meta.__add
 			mt.__sub = meta.__sub
 			mt.__mul = meta.__mul
 			mt.__div = meta.__div
+			mt.__mod = meta.__mod
 			mt.__pow = meta.__pow
+			mt.__unm = meta.__unm
+			mt.__idiv = meta.__idiv
+			mt.__band = meta.__band
+			mt.__bor = meta.__bor
+			mt.__bxor = meta.__bxor
+			mt.__bnot = meta.__bnot
+			mt.__shl = meta.__shl
+			mt.__shr = meta.__shr
 			mt.__concat = meta.__concat
+			mt.__len = meta.__len
+			mt.__eq = meta.__eq
 			mt.__lt = meta.__lt
 			mt.__le = meta.__le
-			mt.__len = meta.__len
-			mt.__classDef = meta.__classDef
 			mt.__mt = mt
 		else
 			local realInstance = utils.copyTable( self.instanceProto ) -- copy member vars into the instance
@@ -706,21 +708,31 @@ do
 				__instance = realInstance,
 				__index = realInstance,
 				__newindex = realInstance,
+				__classDef = meta.__classDef,
+				__close = meta.__close,
 				__gc = meta.__gc,
 				__tostring = meta.__tostring,
+				__name = meta.__name,
 				__call = meta.__call,
-				__eq = meta.__eq,
-				__unm = meta.__unm,
 				__add = meta.__add,
 				__sub = meta.__sub,
 				__mul = meta.__mul,
 				__div = meta.__div,
+				__mod = meta.__mod,
 				__pow = meta.__pow,
+				__unm = meta.__unm,
+				__idiv = meta.__idiv,
+				__band = meta.__band,
+				__bor = meta.__bor,
+				__bxor = meta.__bxor,
+				__bnot = meta.__bnot,
+				__shl = meta.__shl,
+				__shr = meta.__shr,
 				__concat = meta.__concat,
+				__len = meta.__len,
+				__eq = meta.__eq,
 				__lt = meta.__lt,
 				__le = meta.__le,
-				__len = meta.__len,
-				__classDef = meta.__classDef,
 			}
 			mt.__mt = mt
 			setmetatable( instance, mt )
@@ -881,19 +893,29 @@ do
 		-- Build our metatable
 		self.meta = {
 			__gc = utils.classGCRouter,
+			__close = self.metaMethods.__close,
 			__tostring = self.metaMethods.__tostring,
+			__name = self.metaMethods.__name,
 			__call = self.metaMethods.__call,
-			__eq = self.metaMethods.__eq,
-			__unm = self.metaMethods.__unm,
 			__add = self.metaMethods.__add,
 			__sub = self.metaMethods.__sub,
 			__mul = self.metaMethods.__mul,
 			__div = self.metaMethods.__div,
+			__mod = self.metaMethods.__mod,
 			__pow = self.metaMethods.__pow,
+			__unm = self.metaMethods.__unm,
+			__idiv = self.metaMethods.__idiv,
+			__band = self.metaMethods.__band,
+			__bor = self.metaMethods.__bor,
+			__bxor = self.metaMethods.__bxor,
+			__bnot = self.metaMethods.__bnot,
+			__shl = self.metaMethods.__shl,
+			__shr = self.metaMethods.__shr,
 			__concat = self.metaMethods.__concat,
+			__len = self.metaMethods.__len,
+			__eq = self.metaMethods.__eq,
 			__lt = self.metaMethods.__lt,
 			__le = self.metaMethods.__le,
-			__len = self.metaMethods.__len,
 			__classDef = self,
 		}
 
@@ -1193,21 +1215,24 @@ return {
 	end,
 
 	implements = function( pClassInstance, pClassDef )
-		return getmetatable( pClassInstance ).__classDef.interfaces[pClassDef.classID] and true or false
+		local mt = getmetatable( pClassInstance )
+		return mt and mt.__classDef.interfaces[pClassDef.classID] and true or false
 	end,
 
 	is_a = function( pClassInstance, pClassDef )
-		return getmetatable( pClassInstance ).__classDef and
-			getmetatable( pClassInstance ).__classDef.classID == pClassDef.classID
+		local mt = getmetatable( pClassInstance )
+		return mt and mt.__classDef and mt.__classDef.classID == pClassDef.classID
 	end,
 
 	validClass = is51 and
 		(function( pClassInstance )
-			return type( pClassInstance ) == "userdata" and getmetatable(pClassInstance).__classDef ~= nil and not getmetatable(pClassInstance).__removed
+			local mt = getmetatable( pClassInstance )
+			return type( pClassInstance ) == "userdata" and mt and mt.__classDef ~= nil and not mt.__removed
 		end)
 	or
 		(function( pClassInstance )
-			return type( pClassInstance ) == "table" and getmetatable(pClassInstance).__classDef ~= nil and not getmetatable(pClassInstance).__removed
+			local mt = getmetatable( pClassInstance )
+			return type( pClassInstance ) == "table" and mt and mt.__classDef ~= nil and not mt.__removed
 		end),
 
 	loadClass = function( strFile )
@@ -1218,8 +1243,12 @@ return {
 			m.__ACTIVE_CLASS_DEF = nil
 		else
 			-- Lua 5.2+ must set an _ENV metatable and grab a reference to it
+			local err
 			m.__ACTIVE_CLASS_ENV = setmetatable( {}, {__index = m.g} )
-			m.__ACTIVE_CLASS_CHUNK = loadfile( strFile, nil, m.__ACTIVE_CLASS_ENV )
+			m.__ACTIVE_CLASS_CHUNK, err = loadfile( strFile, nil, m.__ACTIVE_CLASS_ENV )
+			if not m.__ACTIVE_CLASS_CHUNK and err then
+				error( err )
+			end
 			m.__ACTIVE_CLASS_CHUNK()
 			m.__ACTIVE_CLASS_DEF:Finalize()
 			m.__ACTIVE_CLASS_DEF = nil

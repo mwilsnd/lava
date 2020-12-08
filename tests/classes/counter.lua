@@ -1,4 +1,4 @@
-do class "Counter" : namespace "test"
+do class "Counter" : namespace "testCounter"
 	{}
 
 	setter "GCCB->m_fnGcCB"
